@@ -1,0 +1,7 @@
+services:
+  mysql:
+    build: .
+    image: kennel-db
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: kennelDB
