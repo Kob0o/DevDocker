@@ -1,0 +1,27 @@
+services:
+  mysql:
+    image: mysql:8
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: mabase
+      MYSQL_USER: user
+      MYSQL_PASSWORD: user
+    volumes:
+      - donnees-mysql:/var/lib/mysql
+    networks:
+      - reseau-mysql
+
+  adminer:
+    image: adminer
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    networks:
+      - reseau-mysql
+
+volumes:
+  donnees-mysql:
+
+networks:
+  reseau-mysql:
