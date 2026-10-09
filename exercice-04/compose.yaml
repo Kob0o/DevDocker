@@ -1,0 +1,21 @@
+services:
+  conteneur-a:
+    build: .
+    image: ubuntu-ping
+    container_name: conteneur-a
+    tty: true
+    stdin_open: true
+    networks:
+      - reseau-ping
+
+  conteneur-b:
+    build: .
+    image: ubuntu-ping
+    container_name: conteneur-b
+    tty: true
+    stdin_open: true
+    networks:
+      - reseau-ping
+
+networks:
+  reseau-ping:
