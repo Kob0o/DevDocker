@@ -1,0 +1,4 @@
+services:
+  ubuntu-nginx:
+    build: .
+    image: ubuntu-nginx

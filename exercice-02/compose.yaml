@@ -1,0 +1,5 @@
+services:
+  jeu-2048:
+    image: kubespheredev/2048
+    ports:
+      - "8080:80"
