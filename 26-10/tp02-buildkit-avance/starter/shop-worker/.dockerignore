@@ -1,0 +1,7 @@
+pip.conf
+pip.conf.example
+.git
+.gitignore
+**/__pycache__
+.pytest_cache
+*.md
