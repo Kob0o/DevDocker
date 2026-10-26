@@ -1,0 +1,16 @@
+# Secrets et données qui ne doivent jamais entrer dans le contexte
+.env
+.env.*
+*.sql
+
+# Dépendances et métadonnées locales
+node_modules
+.git
+.gitignore
+.DS_Store
+
+# Docs et fichiers de build, inutiles dans l'image
+*.md
+*.log
+Dockerfile
+.dockerignore
