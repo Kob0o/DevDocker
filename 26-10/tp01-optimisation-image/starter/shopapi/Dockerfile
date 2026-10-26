@@ -29,7 +29,8 @@ COPY --from=deps --chown=node:node /app/node_modules ./node_modules
 COPY --chown=node:node package.json ./
 COPY --chown=node:node src ./src
 
-USER node
+# 1000 = user node de node:20-alpine. hadolint râle sur le nom (DL3066).
+USER 1000
 EXPOSE 3000
 
 HEALTHCHECK --interval=5s --timeout=3s --start-period=3s --retries=3 \
