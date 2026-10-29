@@ -1,0 +1,62 @@
+services:
+  api:
+    pull_policy: missing
+    build: !reset null
+    image: ${REGISTRY}/shopapi:${VERSION}
+    ports: !reset []
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    command: ["node", "src/server.js"]
+    deploy:
+      replicas: 2
+      resources:
+        limits:
+          cpus: "0.50"
+          memory: 256M
+
+  worker:
+    pull_policy: missing
+    build: !reset null
+    image: ${REGISTRY}/shop-worker:${VERSION}
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    command: ["python", "-m", "worker.main"]
+    deploy:
+      resources:
+        limits:
+          cpus: "0.50"
+          memory: 256M
+
+  db:
+    ports: !reset []
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 512M
+
+  redis:
+    deploy:
+      resources:
+        limits:
+          cpus: "0.50"
+          memory: 128M
+
+  traefik:
+    ports:
+      - "80:80"
+    deploy:
+      resources:
+        limits:
+          cpus: "0.25"
+          memory: 128M

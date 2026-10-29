@@ -1,0 +1,194 @@
+name: shop
+
+x-healthcheck-defaults: &healthcheck-defaults
+  interval: 5s
+  timeout: 3s
+  retries: 10
+  start_period: 10s
+
+x-logging: &logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "3"
+
+services:
+  db:
+    image: postgres:16.4-alpine
+    restart: unless-stopped
+    logging: *logging
+    environment:
+      POSTGRES_USER: shop
+      POSTGRES_DB: shop
+      POSTGRES_PASSWORD_FILE: /run/secrets/db_password
+    secrets:
+      - db_password
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./db/init.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+    networks:
+      - back
+    healthcheck:
+      <<: *healthcheck-defaults
+      test: ["CMD-SHELL", "pg_isready -U shop -d shop"]
+
+  redis:
+    image: redis:7.4-alpine
+    restart: unless-stopped
+    logging: *logging
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redisdata:/data
+    networks:
+      - back
+    healthcheck:
+      <<: *healthcheck-defaults
+      test: ["CMD", "redis-cli", "ping"]
+
+  api:
+    pull_policy: build
+    build: ./apps/shopapi
+    restart: unless-stopped
+    logging: *logging
+    environment:
+      REDIS_URL: redis://redis:6379
+    secrets:
+      - db_password
+    volumes:
+      - ./scripts/with-db-url.sh:/entry/with-db-url.sh:ro
+    entrypoint: ["/bin/sh", "/entry/with-db-url.sh"]
+    command: ["node", "src/server.js"]
+    networks:
+      - front
+      - back
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      <<: *healthcheck-defaults
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:3000/health').then((r) => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))",
+        ]
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=shop_front
+      - traefik.http.routers.api.rule=Host(`api.localhost`)
+      - traefik.http.routers.api.entrypoints=web
+      - traefik.http.services.api.loadbalancer.server.port=3000
+      - traefik.http.services.api.loadbalancer.healthcheck.path=/health
+      - traefik.http.services.api.loadbalancer.healthcheck.interval=5s
+
+  worker:
+    pull_policy: build
+    build:
+      context: ./apps/shop-worker
+      secrets:
+        - pipconf
+    restart: unless-stopped
+    logging: *logging
+    environment:
+      REDIS_URL: redis://redis:6379
+    secrets:
+      - db_password
+    volumes:
+      - ./scripts/with-db-url.sh:/entry/with-db-url.sh:ro
+    entrypoint: ["/bin/sh", "/entry/with-db-url.sh"]
+    command: ["python", "-m", "worker.main"]
+    networks:
+      - back
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      <<: *healthcheck-defaults
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://127.0.0.1:9100/', timeout=2)",
+        ]
+
+  traefik:
+    image: traefik:v3.6
+    restart: unless-stopped
+    logging: *logging
+    command:
+      - --entrypoints.web.address=:80
+      - --ping=true
+      - --accesslog=true
+      - --providers.docker=true
+      - --providers.docker.exposedbydefault=false
+      - --providers.docker.network=shop_front
+    ports:
+      - "80:80"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - front
+    healthcheck:
+      <<: *healthcheck-defaults
+      test: ["CMD", "traefik", "healthcheck", "--ping"]
+
+  adminer:
+    image: adminer:4.8.1
+    profiles: ["tools"]
+    restart: unless-stopped
+    logging: *logging
+    environment:
+      ADMINER_DEFAULT_SERVER: db
+    networks:
+      - front
+      - back
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      <<: *healthcheck-defaults
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1:8080 || exit 1"]
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=shop_front
+      - traefik.http.routers.adminer.rule=Host(`adminer.localhost`)
+      - traefik.http.routers.adminer.entrypoints=web
+      - traefik.http.services.adminer.loadbalancer.server.port=8080
+
+  migrate:
+    image: postgres:16.4-alpine
+    profiles: ["ops"]
+    restart: "no"
+    logging: *logging
+    secrets:
+      - db_password
+    volumes:
+      - ./scripts/migrate.sh:/scripts/migrate.sh:ro
+      - ./db/migrations:/migrations:ro
+    entrypoint: ["/bin/sh", "/scripts/migrate.sh"]
+    networks:
+      - back
+    depends_on:
+      db:
+        condition: service_healthy
+
+networks:
+  front:
+  back:
+    internal: true
+
+volumes:
+  pgdata:
+  redisdata:
+
+secrets:
+  db_password:
+    file: ./secrets/db_password.txt
+  pipconf:
+    file: ./apps/shop-worker/pip.conf

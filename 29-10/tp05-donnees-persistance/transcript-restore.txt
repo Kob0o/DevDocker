@@ -1,0 +1,21 @@
+CREATE TABLE
+CREATE TABLE
+INSERT 0 500
+INSERT 0 100000
+ orders |             checksum             
+--------+----------------------------------
+ 100000 | d0db8dd0c80411d21e86136be0ee6899
+(1 row)
+
+=== backup ===
+dump logique 20261029-165022
+copie brute shopdata_pgdata
+ok /Users/enzoga/Desktop/Cours/M2/DevDocker/29-10/tp05-donnees-persistance/backups/shop-20261029-165022.dump
+ok /Users/enzoga/Desktop/Cours/M2/DevDocker/29-10/tp05-donnees-persistance/backups/pgdata-20261029-165022.tgz
+=== down -v ===
+=== up ===
+=== restore ===
+restore /Users/enzoga/Desktop/Cours/M2/DevDocker/29-10/tp05-donnees-persistance/backups/shop-20261029-165022.dump
+restauré
+=== checksum après ===
+100000|d0db8dd0c80411d21e86136be0ee6899

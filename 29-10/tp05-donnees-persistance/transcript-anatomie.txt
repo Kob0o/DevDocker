@@ -1,0 +1,133 @@
+=== mounts ===
+[
+    {
+        "Type": "volume",
+        "Name": "shop_pgdata",
+        "Source": "/var/lib/docker/volumes/shop_pgdata/_data",
+        "Destination": "/var/lib/postgresql/data",
+        "Driver": "local",
+        "Mode": "rw",
+        "RW": true,
+        "Propagation": ""
+    },
+    {
+        "Type": "bind",
+        "Source": "/host_mnt/Users/enzoga/Desktop/Cours/M2/DevDocker/29-10/tp04-compose-entreprise/starter/db/init.sql",
+        "Destination": "/docker-entrypoint-initdb.d/01-init.sql",
+        "Mode": "ro",
+        "RW": false,
+        "Propagation": "rprivate"
+    },
+    {
+        "Type": "bind",
+        "Source": "/Users/enzoga/Desktop/Cours/M2/DevDocker/29-10/tp04-compose-entreprise/starter/secrets/db_password.txt",
+        "Destination": "/run/secrets/db_password",
+        "Mode": "",
+        "RW": false,
+        "Propagation": "rprivate"
+    }
+]
+=== volume ===
+[
+    {
+        "CreatedAt": "2026-10-29T15:41:06Z",
+        "Driver": "local",
+        "Labels": {
+            "com.docker.compose.config-hash": "2e6965aae4be884527a3afdfd8a79c1df6e053b87c8af8d38f5a222324c8c722",
+            "com.docker.compose.project": "shop",
+            "com.docker.compose.version": "5.1.4",
+            "com.docker.compose.volume": "pgdata"
+        },
+        "Mountpoint": "/var/lib/docker/volumes/shop_pgdata/_data",
+        "Name": "shop_pgdata",
+        "Options": null,
+        "Scope": "local"
+    }
+]
+=== df ===
+Images space usage:
+
+REPOSITORY                                  TAG               IMAGE ID       CREATED             SIZE      SHARED SIZE   UNIQUE SIZE   CONTAINERS
+127.0.0.1:5500/shop-worker                  1.4.2             a86f65c3e1c2   3 minutes ago       219MB     139.8MB       79.39MB       1
+127.0.0.1:5500/shopapi                      1.4               329ab1467797   44 minutes ago      13.4kB    0B            13.37kB       0
+127.0.0.1:5500/shop-ret                     alias             4031316601d3   About an hour ago   13.4kB    0B            13.37kB       0
+127.0.0.1:5500/shop-ret                     mid               11cf954e724f   About an hour ago   13.4kB    0B            13.37kB       0
+127.0.0.1:5500/shop-ret                     1.2.3             acc9fea8764a   About an hour ago   13.4kB    0B            13.37kB       0
+httpd                                       latest            d3accb516506   38 hours ago        45.6MB    139.8MB       -9.417e+07B   0
+redis                                       7.4-alpine        8da19c7399dc   2 days ago          58.7MB    32B           58.7MB        1
+worker                                      1.0               8bc401868a2a   3 days ago          219MB     202.7MB       16.4MB        0
+host.docker.internal:5050/shopapi           1.0               657ba22f2d11   3 days ago          212MB     193.8MB       18.09MB       0
+host.docker.internal:5050/shop-worker       1.0               8d758a4179b8   3 days ago          219MB     202.7MB       16.41MB       0
+worker                                      test              bc2d78c61922   3 days ago          278MB     202.7MB       75.21MB       0
+shopapi                                     test              4e670c8867b8   3 days ago          277MB     193.8MB       83.16MB       0
+shopapi                                     1.4.2             8143092dc84e   3 days ago          212MB     211.8MB       13.76kB       0
+127.0.0.1:5500/shopapi                      1.4.2             ca3e6946da63   3 days ago          212MB     211.8MB       13.88kB       2
+shopapi                                     legacy            5d787e7d02c8   3 days ago          1.06GB    0B            1.064GB       0
+portainer/portainer-ce                      lts               3609c307943b   7 days ago          41.4MB    32B           41.37MB       0
+exercice10-app                              latest            41933b457f1f   2 weeks ago         547MB     458.6MB       88.04MB       1
+exercice-09-crud                            latest            75d946dfb1f8   2 weeks ago         559MB     458.6MB       100.2MB       0
+exercice-09-logs                            latest            5fc58d8a7e5e   2 weeks ago         497MB     458.6MB       38MB          0
+exercice-08-api                             latest            1fabc007b254   2 weeks ago         559MB     458.6MB       100.2MB       0
+kennel-db                                   latest            8186eabbd373   2 weeks ago         1.1GB     1.101GB       24.71kB       0
+postgres                                    16                ca0bd484cb98   3 weeks ago         663MB     139.7MB       523.6MB       1
+nginx                                       latest            f9ea18bfa4fa   3 weeks ago         261MB     139.7MB       121.3MB       2
+moby/buildkit                               buildx-stable-1   cec9f139f45e   4 weeks ago         358MB     0B            357.5MB       1
+mysql                                       8                 6ea90827b110   4 weeks ago         1.12GB    1.101GB       15.75MB       1
+<none>                                      <none>            f144425ff09b   4 weeks ago         180MB     176.5MB       3.754MB       0
+adminer                                     latest            74f29c416e14   4 weeks ago         159MB     32B           159.3MB       1
+traefik                                     v3.6              31267173a15b   2 months ago        230MB     0B            229.6MB       1
+hadolint/hadolint                           latest            32dac94127fd   3 months ago        73.8MB    0B            73.79MB       0
+portainer/agent                             2.39.3            236246fc09b3   4 months ago        47.1MB    0B            47.13MB       0
+alpine                                      3.20              d9e853e87e55   6 months ago        13.7MB    0B            13.66MB       0
+node                                        20-alpine         fb4cd12c85ee   6 months ago        194MB     193.8MB       408.1kB       0
+joxit/docker-registry-ui                    latest            bb5956a6b378   9 months ago        36.3MB    32B           36.29MB       1
+kindest/node                                v1.34.3           08497ee19eac   10 months ago       1.33GB    0B            1.325GB       1
+docker/desktop-cloud-provider-kind          v0.5.0            4ad59ce20658   10 months ago       574MB     32B           574.1MB       1
+envoyproxy/envoy                            v1.36.4           08acc53db6f4   10 months ago       233MB     32B           233.3MB       1
+docker/desktop-containerd-registry-mirror   v0.0.3            179a9ea3ae47   10 months ago       48.8MB    0B            48.82MB       1
+=== diff ===
+-- docker diff --
+C /docker-entrypoint-initdb.d
+A /docker-entrypoint-initdb.d/01-init.sql
+C /run
+C /run/postgresql
+A /run/postgresql/.s.PGSQL.5432
+A /run/postgresql/.s.PGSQL.5432.lock
+A /run/secrets
+A /run/secrets/db_password
+C /tmp
+A /tmp/x
+=== copie shopcopy ===
+volume après up: shopcopy_pgdata
+volume après down: shopcopy_pgdata
+volume après down -v: 
+Going to remove shopcopy-db-1
+volume après rm: shopcopy_pgdata
+Total reclaimed space: 0B
+volume après prune: shopcopy_pgdata
+=== init.sql ===
+-- premier boot --
+-- après restart --
+(les lignes ci-dessus datent du premier boot, le restart n a rien ajouté)
+volume après down -v final: 
+=== volume anonyme ===
+volume anonyme 8f101109d16577dfbcc2e3ba8f508ecb8236b909e67dc1fd5fb0ffaaa54a23a3
+après rm: 8f101109d16577dfbcc2e3ba8f508ecb8236b909e67dc1fd5fb0ffaaa54a23a3
+après rm -v, le volume 6fb18d6d6c2dd0e0e37a72b8e41010288045919afc393580af779062abc172d3: 
+=== init.sql (volume vide) ===
+-- premier boot --
+initdb: warning: enabling "trust" authentication for local connections
+initdb: hint: You can change this by editing pg_hba.conf or using the option -A, or --auth-local and --auth-host, the next time you run initdb.
+/usr/local/bin/docker-entrypoint.sh: running /docker-entrypoint-initdb.d/01-init.sql
+-- logs des 15 dernières secondes --
+initdb: warning: enabling "trust" authentication for local connections
+initdb: hint: You can change this by editing pg_hba.conf or using the option -A, or --auth-local and --auth-host, the next time you run initdb.
+/usr/local/bin/docker-entrypoint.sh: running /docker-entrypoint-initdb.d/01-init.sql
+=== prune ===
+Total reclaimed space: 0B
+reste: cours-prune-test
+=== restart sans rejouer init ===
+pas de init.sql dans les logs du restart
+=== prune volume anonyme ===
+avant prune: 1cc1f529e988c924039dc53aef56b503e879e0e9ffdc6db81d98d299e526af7b
+après prune: 

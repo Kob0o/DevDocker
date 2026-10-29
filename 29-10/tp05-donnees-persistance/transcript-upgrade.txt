@@ -1,0 +1,11 @@
+checksum avant d0db8dd0c80411d21e86136be0ee6899
+dumps écrits
+essai postgres 16 sur le volume 14
+
+PostgreSQL Database directory appears to contain a database; Skipping initialization
+
+2026-10-29 15:50:42.720 UTC [1] FATAL:  database files are incompatible with server
+2026-10-29 15:50:42.720 UTC [1] DETAIL:  The data directory was initialized by PostgreSQL version 14, which is not compatible with this version 16.4.
+exit 1
+checksum après d0db8dd0c80411d21e86136be0ee6899
+verdict OK

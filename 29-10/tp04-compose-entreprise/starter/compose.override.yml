@@ -1,0 +1,31 @@
+services:
+  api:
+    environment:
+      LOG_LEVEL: debug
+    command: ["node", "--watch", "src/server.js"]
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./apps/shopapi/src:/app/src
+
+  worker:
+    environment:
+      LOG_LEVEL: DEBUG
+    volumes:
+      - ./apps/shop-worker/worker:/app/worker
+
+  db:
+    ports:
+      - "5432:5432"
+
+  traefik:
+    command:
+      - --entrypoints.web.address=:80
+      - --ping=true
+      - --accesslog=true
+      - --api.insecure=true
+      - --providers.docker=true
+      - --providers.docker.exposedbydefault=false
+      - --providers.docker.network=shop_front
+    ports:
+      - "8080:8080"
