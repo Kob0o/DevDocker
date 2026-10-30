@@ -36,3 +36,23 @@ Image `alpine:3.20`, conteneurs jetés après chaque essai.
 | `--memory 32m` | Alpine n'a pas Python. `python:3.12-alpine`, `python -c "x='a'*100_000_000"`. Exit 137, `OOMKilled=true`. La swap était à 64 Mio (défaut, deux fois la limite) et ça n'a pas suffi. |
 | `--user 1000` | `id` : `uid=1000 gid=0`. Un bind mount créé sur le Mac apparaît comme uid 1000 dans le conteneur (Docker Desktop réécrit le propriétaire), donc lecture et écriture passent. Un volume nommé avec un fichier root en `0600` : `cat` et `touch` en uid 1000 sont `Permission denied`. |
 | seccomp | `unshare --user` : `Operation not permitted`. Le même avec `--security-opt seccomp=unconfined` affiche `ok`. Le profil par défaut (`moby/profiles`, `defaultAction` = `SCMP_ACT_ERRNO`) est une allowlist. Sur aarch64, libseccomp connaît 312 appels. Pour un conteneur avec les caps par défaut, **52** ne sont pas autorisés, dont `unshare`, `mount`, `keyctl`, `bpf`, `io_uring_*`. |
+
+# Étape 3
+
+`compose.hardened.yml` en surcharge de `compose.yml`. `up -d --wait` : api, worker, db, redis, traefik et le proxy sont healthy. Le sidecar `shop-db-backup-1` n'est pas dans ce fichier, il est resté tel quel (orphelin, volume gardé).
+
+Smoke test du TP04 : `/ready` ok, cache MISS puis HIT, commande `confirmed`. Traefik répartit sur les deux API (`172.24.0.3` et `172.24.0.4`) via le proxy, plus par la socket.
+
+`audit-apres.txt` : api, worker, db, redis et traefik n'ont plus d'écart. Il en reste 8. Le proxy est root et garde la socket (`srw-rw---- root:root`, un autre uid ne l'ouvre pas). Le backup n'a pas été durci.
+
+Postgres a `CHOWN`, `DAC_OVERRIDE`, `FOWNER` (l'entrypoint fait `chmod` puis `chown` sur le volume) et `SETUID`/`SETGID` (`gosu postgres`). Traefik n'a que `NET_BIND_SERVICE` pour écouter sur le port 80 en uid 65534. Redis est en 999, le worker en 1000. Le proxy est en GET seulement (`POST=0`), socket en `:ro`, réseau `socket` internal, aucun port publié.
+
+# Étape 4
+
+`daemon.json` est une proposition. Il n'a pas été chargé : `userns-remap` changerait le propriétaire des fichiers déjà dans `pgdata` et `redisdata`, Postgres et Redis ne liraient plus leur volume.
+
+`icc: false` coupe le trafic entre conteneurs du bridge par défaut seulement. La stack shop est sur `shop_front` et `shop_back`, ça ne la coupe pas. Deux `docker run` sans réseau nommé ne se parleraient plus.
+
+`userns-remap: default` : le root du conteneur devient un uid haut sur l'hôte (souvent 100000). Les fichiers du volume écrits avant (uid 70 pour Postgres, 999 pour Redis) ne correspondent plus. Il faut un `chown` du volume, ou les conteneurs démarrent en permission denied.
+
+`no-new-privileges` au démon, c'est le même verrou que l'option, pour tout conteneur nouveau. `live-restore` laisse les conteneurs tourner quand le démon redémarre. Les logs `json-file` en 10m × 3 évitent qu'un conteneur sans `max-size` remplisse le disque. `docker logs` marche encore.
