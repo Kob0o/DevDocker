@@ -1,0 +1,49 @@
+groups:
+  - name: shop
+    rules:
+      - alert: ApiDown
+        expr: up{job="api"} == 0
+        for: 30s
+        labels:
+          severity: critical
+        annotations:
+          summary: "API injoignable"
+
+      - alert: Http5xxHigh
+        expr: |
+          sum(rate(http_request_duration_seconds_count{status=~"5.."}[1m]))
+          /
+          sum(rate(http_request_duration_seconds_count[1m])) > 0.05
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "plus de 5% de 5xx"
+
+      - alert: HttpP95Slow
+        expr: |
+          histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[1m])) by (le)) > 0.5
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "p95 au-dessus de 500ms"
+
+      - alert: ContainerRestarting
+        expr: changes(container_start_time_seconds{name=~".+"}[5m]) > 0
+        for: 0s
+        labels:
+          severity: warning
+        annotations:
+          summary: "un conteneur a redémarré"
+
+      - alert: MemoryNearLimit
+        expr: |
+          container_memory_working_set_bytes{name=~".+"}
+          / container_spec_memory_limit_bytes{name=~".+"} > 0.9
+          and container_spec_memory_limit_bytes{name=~".+"} > 0
+        for: 30s
+        labels:
+          severity: warning
+        annotations:
+          summary: "mémoire au-dessus de 90% de la limite"
