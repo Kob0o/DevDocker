@@ -1,0 +1,57 @@
+shop-db-backup-1
+  user=root (non défini au run) privileged=false
+  cap_add=null cap_drop=null
+  read_only=false memory=0 pids_limit=<nil>
+  security_opt=null
+  binds=["shop_backupdata:/backups:rw"]
+  ECART: user-root cap-drop rootfs-rw memory pids no-new-privileges
+
+shop-api-1
+  user=1000 privileged=false
+  cap_add=null cap_drop=["ALL"]
+  read_only=true memory=268435456 pids_limit=<nil>
+  security_opt=["no-new-privileges:true"]
+  binds=["/Users/enzoga/Desktop/Cours/M2/DevDocker/29-10/tp04-compose-entreprise/starter/scripts/with-db-url.sh:/entry/with-db-url.sh:ro"]
+  ECART: pids
+
+shop-worker-1
+  user=root (non défini au run) privileged=false
+  cap_add=null cap_drop=["ALL"]
+  read_only=true memory=268435456 pids_limit=<nil>
+  security_opt=["no-new-privileges:true"]
+  binds=["/Users/enzoga/Desktop/Cours/M2/DevDocker/29-10/tp04-compose-entreprise/starter/scripts/with-db-url.sh:/entry/with-db-url.sh:ro"]
+  ECART: user-root pids
+
+shop-api-2
+  user=1000 privileged=false
+  cap_add=null cap_drop=["ALL"]
+  read_only=true memory=268435456 pids_limit=<nil>
+  security_opt=["no-new-privileges:true"]
+  binds=["/Users/enzoga/Desktop/Cours/M2/DevDocker/29-10/tp04-compose-entreprise/starter/scripts/with-db-url.sh:/entry/with-db-url.sh:ro"]
+  ECART: pids
+
+shop-db-1
+  user=70 (non défini au run) privileged=false
+  cap_add=null cap_drop=null
+  read_only=false memory=536870912 pids_limit=<nil>
+  security_opt=null
+  binds=["shop_pgdata:/var/lib/postgresql/data:rw","/host_mnt/Users/enzoga/Desktop/Cours/M2/DevDocker/29-10/tp04-compose-entreprise/starter/db/init.sql:/docker-entrypoint-initdb.d/01-init.sql:ro"]
+  ECART: cap-drop rootfs-rw pids no-new-privileges
+
+shop-redis-1
+  user=999 (non défini au run) privileged=false
+  cap_add=null cap_drop=null
+  read_only=false memory=134217728 pids_limit=<nil>
+  security_opt=null
+  binds=["shop_redisdata:/data:rw"]
+  ECART: cap-drop rootfs-rw pids no-new-privileges
+
+shop-traefik-1
+  user=root (non défini au run) privileged=false
+  cap_add=null cap_drop=null
+  read_only=false memory=134217728 pids_limit=<nil>
+  security_opt=null
+  binds=["/var/run/docker.sock:/var/run/docker.sock:ro"]
+  ECART: user-root cap-drop rootfs-rw pids no-new-privileges socket
+
+écarts: 24
